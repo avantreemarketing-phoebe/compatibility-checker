@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Compatibility Checker</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    select, table { margin-top: 10px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f0f0f0; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h2>Compatibility Checker</h2>
+  <label for="brand">Choose Brand:</label>
+  <select id="brand" onchange="updateModels()"></select>
+
+  <label for="model">Choose Model:</label>
+  <select id="model" onchange="updateTable()"></select>
+
+  <table id="resultTable" class="hidden">
+    <thead>
+      <tr><th>Transmitter</th><th>Status</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRpd6lqfdkO4uKczz3V_Ouv6X_tp0Qu3E4idsQJ1pkoe-XYcDEHN7QqNMv9SrDLovcYHpfutRSioVl/pub?gid=0&single=true&output=csv";
+
+    let data = [];
+
+    fetch(CSV_URL)
+      .then(res => res.text())
+      .then(csv => {
+        data = csv.trim().split("\n").slice(1).map(line => {
+          const [brand, model, transmitter, status] = line.split(",");
+          return { brand, model, transmitter, status };
+        });
+
+        const brands = [...new Set(data.map(row => row.brand))].sort();
+        const brandSelect = document.getElementById("brand");
+        brands.forEach(brand => {
+          const option = document.createElement("option");
+          option.value = brand;
+          option.textContent = brand;
+          brandSelect.appendChild(option);
+        });
+
+        updateModels();
+      });
+
+    function updateModels() {
+      const brand = document.getElementById("brand").value;
+      const models = [...new Set(data.filter(d => d.brand === brand).map(d => d.model))].sort();
+      const modelSelect = document.getElementById("model");
+      modelSelect.innerHTML = "";
+      models.forEach(model => {
+        const option = document.createElement("option");
+        option.value = model;
+        option.textContent = model;
+        modelSelect.appendChild(option);
+      });
+      updateTable();
+    }
+
+    function updateTable() {
+      const brand = document.getElementById("brand").value;
+      const model = document.getElementById("model").value;
+      const rows = data.filter(d => d.brand === brand && d.model === model);
+      const tbody = document.getElementById("resultTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.transmitter}</td><td>${row.status}</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById("resultTable").classList.toggle("hidden", rows.length === 0);
+    }
+  </script>
+</body>
+</html>
