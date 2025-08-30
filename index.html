@@ -1,35 +1,49 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Compatibility Checker</title>
+  <title>Avantree Compatibility Checker</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    select, table { margin-top: 10px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f0f0f0; }
-    .hidden { display: none; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    select, table {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    #resultTable {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <h2>Compatibility Checker</h2>
+  <h2>Avantree Devices Compatibility Checker</h2>
 
-  <label for="brand">Choose Brand:</label>
-  <select id="brand" onchange="updateModels()"></select>
+  <label for="brand">Select Hearing Aid Brand:</label><br>
+  <select id="brand" onchange="updateModels()"></select><br>
 
-  <label for="model">Choose Model:</label>
+  <label for="model">Select Model:</label><br>
   <select id="model" onchange="updateTable()"></select>
 
-  <table id="resultTable" class="hidden">
+  <table id="resultTable">
     <thead>
       <tr><th>Transmitter</th><th>Status</th></tr>
     </thead>
     <tbody></tbody>
   </table>
-const CSV_URL = "https://script.google.com/macros/s/AKfycbz9WOxGDfYqzpAD2sv3H10pnEvvUc16Dc7B3u647_xvo47fap_g609JfQbvTI_bPYOa/exec";
 
+  <script>
+    const CSV_URL = "https://script.google.com/macros/s/AKfycbykb1WCLd_Eldqz1KwIrWljiBEhan4PV2aqQ-nwXEf48JawQafNvoU4jcJ_Xlqx5sVo/exec";
 
     let data = [];
 
@@ -70,15 +84,24 @@ const CSV_URL = "https://script.google.com/macros/s/AKfycbz9WOxGDfYqzpAD2sv3H10p
     function updateTable() {
       const brand = document.getElementById("brand").value;
       const model = document.getElementById("model").value;
-      const rows = data.filter(d => d.brand === brand && d.model === model);
-      const tbody = document.getElementById("resultTable").querySelector("tbody");
+      const filtered = data.filter(row => row.brand === brand && row.model === model);
+
+      const table = document.getElementById("resultTable");
+      const tbody = table.querySelector("tbody");
       tbody.innerHTML = "";
-      rows.forEach(row => {
+
+      filtered.forEach(row => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${row.transmitter}</td><td>${row.status}</td>`;
+        const td1 = document.createElement("td");
+        td1.textContent = row.transmitter;
+        const td2 = document.createElement("td");
+        td2.textContent = row.status;
+        tr.appendChild(td1);
+        tr.appendChild(td2);
         tbody.appendChild(tr);
       });
-      document.getElementById("resultTable").classList.toggle("hidden", rows.length === 0);
+
+      table.style.display = filtered.length > 0 ? "table" : "none";
     }
   </script>
 </body>
