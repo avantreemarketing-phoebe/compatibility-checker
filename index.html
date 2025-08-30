@@ -15,6 +15,7 @@
 </head>
 <body>
   <h2>Compatibility Checker</h2>
+
   <label for="brand">Choose Brand:</label>
   <select id="brand" onchange="updateModels()"></select>
 
@@ -29,30 +30,29 @@
   </table>
 
   <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRpd6lqfdkO4uKczz3V_Ouv6X_tp0Qu3E4idsQJ1pkoe-XYcDEHN7QqNMv9SrDLovcYHpfutRSioVl/pub?gid=0&single=true&output=csv
-";
+    const CSV_URL = "https://script.google.com/macros/s/AKfycbzJ7FUVoxc4zG1Kelb6yYJWOIG6RZL7VXXTHJ3NIkktB-yoMpLWVVfdVz8L_AqXcapi/exec";
 
     let data = [];
 
     fetch(CSV_URL)
-      .then(res => res.text())
-      .then(csv => {
-        data = csv.trim().split("\n").slice(1).map(line => {
-          const [brand, model, transmitter, status] = line.split(",");
-          return { brand, model, transmitter, status };
-        });
-
-        const brands = [...new Set(data.map(row => row.brand))].sort();
-        const brandSelect = document.getElementById("brand");
-        brands.forEach(brand => {
-          const option = document.createElement("option");
-          option.value = brand;
-          option.textContent = brand;
-          brandSelect.appendChild(option);
-        });
-
-        updateModels();
+      .then(res => res.json())
+      .then(json => {
+        data = json;
+        updateSelects();
       });
+
+    function updateSelects() {
+      const brands = [...new Set(data.map(row => row.brand))].sort();
+      const brandSelect = document.getElementById("brand");
+      brandSelect.innerHTML = "";
+      brands.forEach(brand => {
+        const option = document.createElement("option");
+        option.value = brand;
+        option.textContent = brand;
+        brandSelect.appendChild(option);
+      });
+      updateModels();
+    }
 
     function updateModels() {
       const brand = document.getElementById("brand").value;
